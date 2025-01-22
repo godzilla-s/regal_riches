@@ -35,13 +35,13 @@ func (s *Service) Login(ctx *gin.Context) {
 }
 
 type RegistryRequest struct {
-	Name    string
-	State   string
-	TonAddr string
+	Name    string `json:"name"`
+	State   string `json:"state"`
+	TonAddr string `json:"ton_addr"`
 }
 
 type RegistryReply struct {
-	UserId int
+	UserId int `json:"user_id"`
 }
 
 func (s *Service) Registry(ctx *gin.Context) {
@@ -52,17 +52,18 @@ func (s *Service) Registry(ctx *gin.Context) {
 		return
 	}
 
-	err = s.db.SaveUserInfo(&model.UserInfo{
+	userInfo := &model.UserInfo{
 		Name:      req.Name,
 		State:     "",
 		TonAddr:   req.TonAddr,
 		Active:    true,
 		CreatedAt: time.Now(),
-	})
+	}
+	err = s.db.SaveUserInfo(userInfo)
 	if err != nil {
 		ctx.JSON(500, err)
 		return
 	}
 
-	ctx.JSON(200, &RegistryReply{})
+	ctx.JSON(200, &RegistryReply{UserId: int(userInfo.ID)})
 }

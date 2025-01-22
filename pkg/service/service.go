@@ -170,7 +170,9 @@ type DepositTonRequest struct {
 	Amount int32
 }
 
-type DepositTonReply struct{}
+type DepositTonReply struct {
+	TxnId int
+}
 
 func (s *Service) DepositTON(ctx *gin.Context) {
 	req := new(DepositTonRequest)
@@ -190,16 +192,18 @@ func (s *Service) DepositTON(ctx *gin.Context) {
 		return
 	}
 
-	err = s.db.SaveTonAccount(&model.TonTxnDetail{
+	txnDetail := &model.TonTxnDetail{
 		UserId:   req.UserId,
 		Amount:   req.Amount,
+		Type:     model.TxnTypeDeposit,
 		CreateAt: time.Now(),
-	})
+	}
+	err = s.db.SaveTonAccount(txnDetail)
 	if err != nil {
 		ctx.JSON(500, err)
 		return
 	}
-	ctx.JSON(200, &DepositTonReply{})
+	ctx.JSON(200, &DepositTonReply{TxnId: int(txnDetail.TxnId)})
 }
 
 type TonBalanceRequest struct {

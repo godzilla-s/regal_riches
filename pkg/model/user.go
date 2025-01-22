@@ -3,28 +3,17 @@ package model
 import (
 	"context"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type UserInfo struct {
-	ID        string
 	Name      string
 	TonAddr   string
 	State     string
 	Active    bool
 	CreatedAt time.Time
-}
-
-type Account struct {
-	UserID  string
-	Addr    string
-	Balance int64
-	Status  string
-}
-
-type AccountFlow struct {
-	Addr    string
-	TxnDate time.Time
-	Amount  int64
+	*gorm.Model
 }
 
 func (db *Handler) SaveUserInfo(info *UserInfo) error {
