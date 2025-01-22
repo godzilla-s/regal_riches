@@ -161,8 +161,54 @@ func (s *Service) WithdrawProposal(ctx *gin.Context) {
 	ctx.JSON(200, &WithdrawProposalReply{})
 }
 
-func (s *Service) WithdrawConfirm() {
+type WithdrawConfirmRequest struct {
+	UserId int
+	TxnId  int
+}
 
+type WithdrawConfirmReply struct{}
+
+func (s *Service) WithdrawConfirm(ctx *gin.Context) {
+	req := new(WithdrawConfirmRequest)
+	err := ctx.Bind(req)
+	if err != nil {
+		ctx.JSON(500, err)
+		return
+	}
+
+	userInfo, err := s.db.QueryByUserId(ctx, req.UserId)
+	if err != nil {
+		ctx.JSON(500, err)
+		return
+	}
+
+	if !userInfo.Active {
+		return
+	}
+
+	proposal, err := s.db.QueryWithdrawProposal(ctx, req.TxnId)
+	if err != nil {
+		ctx.JSON(500, err)
+		return
+	}
+
+	err = s.ton.Payment(ctx, "", proposal.Amount)
+	if err != nil {
+		ctx.JSON(500, err)
+		return
+	}
+
+	err = s.db.SaveTonTxnDetail(&model.TonTxnDetail{
+		UserId:   req.UserId,
+		Amount:   int32(proposal.Amount),
+		Type:     model.TxnTypeWithdraw,
+		CreateAt: time.Now(),
+	})
+	if err != nil {
+		ctx.JSON(500, err)
+		return
+	}
+	ctx.JSON(200, &WithdrawConfirmReply{})
 }
 
 type DepositTonRequest struct {
@@ -198,7 +244,7 @@ func (s *Service) DepositTON(ctx *gin.Context) {
 		Type:     model.TxnTypeDeposit,
 		CreateAt: time.Now(),
 	}
-	err = s.db.SaveTonAccount(txnDetail)
+	err = s.db.SaveTonTxnDetail(txnDetail)
 	if err != nil {
 		ctx.JSON(500, err)
 		return

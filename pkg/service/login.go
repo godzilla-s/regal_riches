@@ -17,12 +17,14 @@ type LoginRequest struct {
 }
 
 type LoginReply struct {
+	Token string
 }
 
 func (s *Service) Login(ctx *gin.Context) {
 	var req LoginRequest
 	err := ctx.Bind(&req)
 	if err != nil {
+		ctx.JSON(500, err)
 		return
 	}
 

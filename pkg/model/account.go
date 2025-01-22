@@ -37,6 +37,15 @@ func (db *Handler) SaveWithdrawProposal(proposal *WithhdrawProposal) error {
 	return db.db.Create(proposal).Error
 }
 
+func (db *Handler) QueryWithdrawProposal(ctx context.Context, id int) (*WithhdrawProposal, error) {
+	res := new(WithhdrawProposal)
+	err := db.db.WithContext(ctx).Where("id = ?", id).First(res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 type TxnType int8
 
 const (
@@ -52,7 +61,7 @@ type TonTxnDetail struct {
 	CreateAt time.Time
 }
 
-func (db *Handler) SaveTonAccount(account *TonTxnDetail) error {
+func (db *Handler) SaveTonTxnDetail(account *TonTxnDetail) error {
 	return db.db.Create(account).Error
 }
 
