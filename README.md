@@ -14,3 +14,5 @@ Regal Riche是一款社交游戏的后端服务。提供后端处理接口
 | /deposit | 充值 | |
 | /withdraw | 提现 | |
 | /balance/ton | 余额 | |
+| /withdraw/proposal | 提现请求 | |
+| /withdraw/confirm | 提现确认 | |
